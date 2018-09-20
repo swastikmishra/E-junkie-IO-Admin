@@ -6,6 +6,13 @@
 		  		<div class="box-title">
 		  			<i class="icon ion-md-document"></i>
 		  			Pages
+		  			<el-input
+			            placeholder="Search Pages"
+			            v-model="searchText"
+			            style="width: 200px"
+			            id="searchTextInput"
+			            clearable>
+			          </el-input>
 		  			<el-tag type="danger">{{totalPages}}</el-tag>
 		  			<el-button @click="$router.push({ path: '/page/new' })" size="small" icon="el-icon-circle-plus" type="success" plain>Add New Page</el-button>
 		  		</div>
@@ -18,11 +25,11 @@
 	  					<div class="column is-1"><p>Visible</p></div>
 	  					<div class="column is-1"><p>Delete</p></div>
 	  				</div>
-		  			<div class="columns" v-for="Page,K in Pages">
+		  			<div class="columns" v-for="Page,K in Pages" v-if="Page.show">
 		  				<div class="column is-1">
-		  					<router-link :to="`/page/${K}`">
+		  					<a target="_preview" :href="`${K.replace('.md', '')}`">
 		  						<i class="icon ion-md-open"></i>
-	  						</router-link>
+	  						</a>
   						</div>
   						<div class="column is-5">
 		  					<router-link :to="`/page/${K}`">
@@ -58,25 +65,41 @@ export default {
   data () {
     return {
       Pages: null,
-      totalPages: 0
+      totalPages: 0,
+      loader: null,
+      searchText: null,
     }
   },
   mounted: function(){
   	var self = this
-  	this.axios.post('http://localhost/CMS/api/pages', {
-      user: 'peepalfarm',
-    })
+  	this.loader = this.$loading({
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+  	this.axios.post(window.Config.API.endpoint+'pages', {})
     .then(response => {
-    	self.Pages = response.data
-    	for(var key in self.Pages){
-    		if(self.Pages.hasOwnProperty(key)) self.totalPages++
-    	}
+    	setTimeout(() => {
+			if(self.loader) self.loader.close();
+		}, 500);
+    	self.Pages = response.data.Pages
+    	self.renderPages()
     })
     .catch(e => {
       console.log(e)
     })
   },
   methods: {
+  	renderPages: function(){
+  		this.totalPages = 0
+  		for(var key in this.Pages){
+    		if(this.Pages.hasOwnProperty(key)){
+    			this.totalPages++	
+    			this.Pages[key].show = true
+    		} 
+    	}
+  	},
   	togglePageVisibility: function(c, o){
   		var loading = this.$loading({
           lock: true,
@@ -85,21 +108,21 @@ export default {
           background: 'rgba(0, 0, 0, 0.7)'
         });
         var self = this
-  		this.axios.post('http://localhost/CMS/api/page/visibility', {
-	      user: 'peepalfarm',
+  		this.axios.post(window.Config.API.endpoint+'page/visibility', {
 	      key : c,
 	      page: o
 	    })
 	    .then(response => {
-	    	self.Pages = response.data
+	    	self.Pages = response.data.Pages
+	    	self.renderPages()
 	        setTimeout(() => {
 	          loading.close();
-	        }, 100);
+	        }, 500);
 	    })
 	    .catch(e => {
 	      setTimeout(() => {
 	          loading.close();
-	        }, 100);
+	        }, 500);
 	    })
   	},
   	deletePage: function(c){
@@ -110,16 +133,12 @@ export default {
           background: 'rgba(0, 0, 0, 0.7)'
         });
         var self = this
-  		this.axios.post('http://localhost/CMS/api/page/delete', {
-	      user: 'peepalfarm',
+  		this.axios.post(window.Config.API.endpoint+'page/delete', {
 	      key : c,
 	    })
 	    .then(response => {
-	    	self.Pages = response.data
-	    	self.totalPages = 0
-	    	for(var key in self.Pages){
-	    		if(self.Pages.hasOwnProperty(key)) self.totalPages++
-	    	}
+	    	self.Pages = response.data.Pages
+	    	self.renderPages()
 		    self.$message({
 	          showClose: true,
 	          message: 'Page deleted !',
@@ -127,14 +146,31 @@ export default {
 	        });
 	        setTimeout(() => {
 	          loading.close();
-	        }, 100);
+	        }, 500);
 	    })
 	    .catch(e => {
 	      setTimeout(() => {
 	          loading.close();
-	        }, 100);
+	        }, 500);
 	    })
+  	},
+  	filterPages: function(){
+  		if(!this.searchText){
+  			for(var kk in this.Pages) this.Pages[kk].show = true
+  		}
+  		else for(var kk in this.Pages) 
+  			if(this.Pages[kk].title.toLowerCase().indexOf(this.searchText.toLowerCase()) != -1 || kk.toLowerCase().indexOf(this.searchText.toLowerCase()) != -1) 
+  				this.Pages[kk].show = true
+  			else
+  				this.Pages[kk].show = false
   	}
+  },
+  watch: {
+    searchText: function (val) {
+      if(val == "")
+        this.searchText = null
+      this.filterPages()
+    },
   }
 }
 </script>
@@ -194,5 +230,16 @@ export default {
 	float: right;
 	margin-right: 15px;
 	margin-top: -2px;
+}
+</style>
+<style>
+.box.details #searchTextInput{
+    margin-left: 5px !important; 
+    height: 25px !important; 
+    border-radius: 3px !important; 
+    background: #303f54 !important; 
+    border: 1px solid #1a233c !important; 
+    color: #eee !important; 
+    padding-right: 0px;
 }
 </style>

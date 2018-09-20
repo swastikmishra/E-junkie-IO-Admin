@@ -2,11 +2,12 @@
   <div id="sidebar">
     <router-link to="/"><i class="icon ion-md-analytics"></i> Dashboard</router-link>
     <router-link to="/pages"><i class="icon ion-md-document"></i> Pages</router-link>
+    <router-link to="/themes"><i class="icon ion-md-color-palette"></i> Themes</router-link>
     <router-link to="/templates"><i class="icon ion-md-brush"></i> Templates</router-link>
     <a @click="showAssets()"><i class="icon ion-ios-albums"></i> Assets</a>
-    <a href="#"><i class="icon ion-md-settings"></i> Settings</a>
-    <a href="#"><i class="icon ion-md-infinite"></i> Integrations</a>
-    <a href="#"><i class="icon ion-md-hand"></i> Logout</a>
+    <router-link to="/settings"><i class="icon ion-md-settings"></i> Settings</router-link>
+    <router-link to="/integrations"><i class="icon ion-md-infinite"></i> Integrations</router-link>
+    <a href="/logout"><i class="icon ion-md-hand"></i> Logout</a>
   </div>
 </template>
 

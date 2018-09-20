@@ -7,7 +7,7 @@
       <div class="navbar-menu">
         <div class="navbar-end">
           <a class="navbar-item">
-            <i class="icon ion-md-happy"></i> Robin
+            <i class="icon ion-md-happy"></i> {{Username}}
           </a>
         </div>
       </div>
@@ -20,8 +20,27 @@ export default {
   name: 'Navbar',
   data () {
     return {
-    
+      Username: "",
     }
+  },
+  mounted: function(){
+    var self = this
+    this.axios.post(window.Config.API.endpoint+'settings/name', {})
+    .then(response => {
+      self.Username = response.data
+    })
+    .catch(e => {
+      self.axios.errors.push(e)
+    })
+    setInterval(function(){
+      self.axios.post(window.Config.API.endpoint+'session', {})
+      .then(response => {
+        console.log(response.data)
+      })
+      .catch(e => {
+        console.log(response.data)
+      })
+    }, 60000)
   }
 }
 </script>

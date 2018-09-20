@@ -6,19 +6,31 @@
       :fullscreen="true">
       <div class="columns is-multiline">
         <div class="column is-8">
-          <div class="card" v-for="asset,k in Assets">
-            <el-button @click="deleteAsset(asset.key)" type="danger" icon="el-icon-delete" circle></el-button>
-            <div class="card-image" @click="viewImage(asset.url)" >
-              <figure class="image is-4by3">
-                <img :src="asset.url">
-              </figure>
-            </div>
-            <div class="card-content">
-                <div class="media-content">
-                  <p class="title is-4">{{asset.asset}}</p>
-                </div>
-            </div>
-          </div>
+          <el-input
+            placeholder="Search Assets"
+            v-model="searchText"
+            clearable>
+          </el-input>
+          <table class="table is-striped is-hoverable is-fullwidth">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Url</th>
+                <th>Operations</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="asset,k in Assets" v-if="asset.visible">
+                <th>{{asset.asset}}</th>
+                <th><a :href="asset.url" target="_preview">{{asset.url}}</a></th>
+                <th>
+                  <abbr title="Preview Asset"><el-button @click="viewAsset(asset.url)" type="info" icon="ion-md-open"></el-button></abbr>
+                  <abbr title="Copy URL"><el-button v-clipboard:copy="asset.url" v-clipboard:success="urlCopied" type="link" icon="ion-ios-copy"></el-button></abbr>
+                  <abbr title="Delete Asset"><el-button @click="deleteAsset(asset.key)" type="danger" icon="el-icon-delete"></el-button></abbr>
+                </th>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <div class="column is-3">
           <el-upload
@@ -66,11 +78,11 @@ export default {
       Assets: null,
       previewUrl: null,
       fileList: [],
-      data:{
-        user: 'peepalfarm'
-      },
+      data:{},
       uploadPercentage: 0,
       upploadAction: window.Config.API.endpoint+"assets/save",
+      searchText: null,
+      loader: null,
     }
   },
   created: function(){
@@ -84,24 +96,41 @@ export default {
   },
   methods: {
     getAssets: function(){
+      this.loader = this.$loading({
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       var self = this
-      this.axios.post(window.Config.API.endpoint+'assets', {
-          user: 'peepalfarm',
-        })
+      this.axios.post(window.Config.API.endpoint+'assets', {})
         .then(response => {
+          setTimeout(() => {
+            if(self.loader) self.loader.close();
+          }, 500);
           self.Assets = response.data
+          for(var kk in self.Assets)
+            self.Assets[kk].visible = true
         })
         .catch(e => {
         })
     },
     deleteAsset: function(key){
       var self = this
-      this.axios.post(window.Config.API.endpoint+'assets/delete', {
-          user: 'peepalfarm',
-          key: key,
-        })
+       this.loader = this.$loading({
+        lock: true,
+        text: 'Deleting Asset',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      this.axios.post(window.Config.API.endpoint+'assets/delete', { key: key })
         .then(response => {
           self.Assets = response.data
+          for(var kk in self.Assets)
+            self.Assets[kk].visible = true
+          setTimeout(() => {
+            if(self.loader) self.loader.close();
+          }, 500);
         })
         .catch(e => {
         })
@@ -120,23 +149,51 @@ export default {
           showClose: true,
         });
         this.Assets = r
-      }
+        for(var kk in this.Assets)
+            this.Assets[kk].visible = true
+        }
       this.uploadPercentage=0
     },
     assetsUploadProgress: function(e, f, fl){
       this.uploadPercentage = e.percent
     },
-    viewImage: function(p){
+    viewAsset: function(p){
       this.previewUrl = (p)
       this.showPreviewDialog = true
+    },
+    filterAssets: function(){
+      if(!this.searchText){
+        for(var kk in this.Assets) this.Assets[kk].visible = true
+      }else{
+        for(var kk in this.Assets){
+          if(this.Assets[kk].asset.indexOf(this.searchText) != -1)          
+            this.Assets[kk].visible = true
+          else
+            this.Assets[kk].visible = false
+        }
+      }
+    },
+    urlCopied: function(e){
+      this.$message({
+          message: 'Copied Asset URL',
+          type: 'success',
+          showClose: true,
+        });
     }
+  },
+  watch: {
+    searchText: function (val) {
+      if(val == "")
+        this.searchText = null
+      this.filterAssets()
+    },
   }
 }
 </script>
 <style scoped>
 .el-dialog{
-  background: #3e3e3e;
-  color: #fff;
+  background: #3e3e3e !important;
+  color: #fff !important;
 }
 .el-dialog__header, .el-dialog__title{
   color: #eee !important;
@@ -148,11 +205,8 @@ export default {
   text-align: center;
 }
 .el-button{
-  padding: 12px !important;
-  float: right;
-  z-index: 999999;
-  position: relative;
-  margin: 5px;
+  padding: 5px !important;
+  margin: 2px;
 }
 .card{
   display: inline-block;

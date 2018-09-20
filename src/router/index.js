@@ -29,6 +29,24 @@ const router = new Router({
       meta: { title: 'Templates', auth: true }
     },
     {
+      path: '/themes',
+      name: 'Themes',
+      component: function(resolve){ require(['../components/Themes'], resolve) },
+      meta: { title: 'Themes', auth: true }
+    },
+    {
+      path: '/settings',
+      name: 'Settings',
+      component: function(resolve){ require(['../components/Settings'], resolve) },
+      meta: { title: 'Settings', auth: true }
+    },
+    {
+      path: '/integrations',
+      name: 'Integrations',
+      component: function(resolve){ require(['../components/Integrations'], resolve) },
+      meta: { title: 'Integrations', auth: true }
+    },
+    {
       path: '*',
       name: 'NotFound',
       component: function(resolve){ require(['../components/NotFound'], resolve) },

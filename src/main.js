@@ -9,9 +9,11 @@ import locale from 'element-ui/lib/locale/lang/en'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import EventBus from './EventBus'
+import VueClipboard from 'vue-clipboard2'
 
 Vue.use(ElementUI, { locale })
 Vue.use(VueAxios, axios)
+Vue.use(VueClipboard)
 Vue.config.productionTip = false
 Vue.prototype.$bus = EventBus
 

@@ -23,35 +23,13 @@
 		  		</div>
 		  		<div class="box-content" v-if="WebsiteStats">
 			  		<p>Total Pages <span>{{WebsiteStats.totalPages}}</span></p>
-			  		<p>Recently Added Pages <span>{{WebsiteStats.recently_added_pages_count}}</span></p>
-			  		<p>Last Edit <span>{{WebsiteStats.last_edit.timestamp}}</span></p>
+            <p>Last Edit <span>{{WebsiteStats.last_edit.timestamp}}</span></p>
+			  		<p>Theme <span>{{Website.theme}}</span></p>
 		  		</div>
 			</div>
   		</div>
-
+  		
   		<div class="column is-4">
-  			<div class="box details">
-		  		<div class="box-title">
-		  			Recently Added Pages
-		  		</div>
-		  		<div class="box-content" v-if="WebsiteStats">
-			  		<p v-for="pages in WebsiteStats.recently_added_pages">{{pages.title}} <span>{{pages.created_at}}</span></p>
-		  		</div>
-			</div>
-  		</div>
-
-  		<div class="column is-4">
-  			<div class="box details">
-		  		<div class="box-title">
-		  			Recently Edited Pages
-		  		</div>
-		  		<div class="box-content" v-if="WebsiteStats">
-			  		<p v-for="pages in WebsiteStats.recently_edited_pages">{{pages.title}} <span>{{pages.updated_at}}</span></p>
-		  		</div>
-			</div>
-  		</div>
-
-  		<div class="column is-3">
   			<div class="box details">
 		  		<div class="box-title">
 		  			Shortcuts
@@ -62,6 +40,29 @@
 		  		</div>
 			</div>
   		</div>
+
+  		<div class="column is-6">
+  			<div class="box details">
+		  		<div class="box-title">
+		  			Recently Added Pages
+		  		</div>
+		  		<div class="box-content" v-if="WebsiteStats">
+			  		<p v-for="pages,k in WebsiteStats.recently_added_pages"><router-link :to="`/page/${k}`">{{pages.title}} <span>{{pages.created_at}}</span></router-link></p>
+		  		</div>
+			</div>
+  		</div>
+
+  		<div class="column is-6">
+  			<div class="box details">
+		  		<div class="box-title">
+		  			Recently Edited Pages
+		  		</div>
+		  		<div class="box-content" v-if="WebsiteStats">
+			  		<p v-for="pages,k in WebsiteStats.recently_edited_pages"><router-link :to="`/page/${k}`">{{pages.title}} <span>{{pages.updated_at}}</span></router-link></p>
+		  		</div>
+			</div>
+  		</div>
+
   	</div>
   </div>
 </template>
@@ -100,9 +101,7 @@ export default {
       self.axios.errors.push(e)
     })
 
-    this.axios.post(window.Config.API.endpoint+'websiteStats', {
-      user: 'peepalfarm',
-    })
+    this.axios.post(window.Config.API.endpoint+'websiteStats', {})
     .then(response => {
     	self.WebsiteStats = response.data
     	self.WebsiteStats.recently_added_pages_count = self.WebsiteStats.recently_added_pages.length
