@@ -312,7 +312,7 @@ export default {
     		var tA = document.getElementById("templateEditorTextarea")
     		if(!document.getElementById("templateEditorTextarea").parentNode.children[1])
     			self.myCodeMirror = null
-    		if(self.myCodeMirror){
+	    		if(self.myCodeMirror){
     			self.myCodeMirror.setValue(self.Template.template)
     			return false;	
     		}
