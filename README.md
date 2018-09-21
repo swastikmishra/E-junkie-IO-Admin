@@ -1,3 +1,4 @@
+<img src="https://www.e-junkie.com/ej/images/E-junkieIO1.png" style="max-width: 250px">
 # E-junkie IO Admin
 
 > Vue.js source code

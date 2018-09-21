@@ -2,7 +2,7 @@
   <div id="navbar">
     <nav class="navbar is-fixed-top">
       <div class="navbar-brand">
-        <h1><i class="icon ion-md-aperture"></i> Contenture</h1>
+        <h1><img src="https://www.e-junkie.com/ej/images/E-junkieIO2.png"></h1>
       </div>
       <div class="navbar-menu">
         <div class="navbar-end">
@@ -52,13 +52,18 @@ nav{
 nav h1{
   background: rgba(0,0,0,0.3);
   color: white;
-  padding: 14px;
   font-size: 16px;
   font-family: Montserrat;
   font-weight: lighter;
 }
 nav h1 i{
   font-size: 30px;
+}
+.navbar-brand img{
+  width: 130px;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-right: 15px;
 }
 .navbar-item{
   color: #eee;
