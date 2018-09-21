@@ -10,13 +10,17 @@
 		  		<div class="box-content" v-if="Themes">
             <div class="columns is-multiline">
               <div class="column is-3" v-for="Theme in Themes">
-                <div class="box">
+                <div class="box theme">
+                  <button class="delete is-medium" v-if="Theme.key != selectedTheme" @click="deleteTheme(Theme.key)"></button>
                   <img :src="Theme.thumbnail">
-                  <h3>{{Theme.name}}</h3>
-                  <p>{{Theme.author}}</p>
-                  <a :href="Theme.demo" target="_blank">Demo</a>
-                  <a :href="Theme.homepage" target="_blank">Homepage</a>
-                  <span class="tag is-success is-medium is-rounded" v-if="Theme.name == selectedTheme">Selected</span>
+                  <div class="content">
+                    <h3>{{Theme.name}}</h3>
+                    <p>{{Theme.author}}</p>
+                    <a class="button is-link is-outlined" :href="Theme.demo" target="_blank">Demo</a>
+                    <a class="button is-info is-outlined" :href="Theme.homepage" target="_blank">Homepage</a>
+                  </div>
+                  <button class="button is-primary is-fullwidth" v-if="Theme.key != selectedTheme" @click="selectTheme(Theme.key)"><i class="ion-md-checkmark"></i> Select</button>
+                  <button class="button is-success is-fullwidth" v-else><i class="ion-md-thumbs-up"></i> Selected</button>
                 </div>
               </div>
             </div>
@@ -51,17 +55,20 @@ export default {
 			if(self.loader) self.loader.close();
 		}, 500);
       self.Themes = response.data.themes
-      for(var x in self.Themes){
-        if(!self.Themes[x].thumbnail) self.Themes[x].thumbnail = "https://carepharmaceuticals.com.au/wp-content/uploads/sites/19/2018/02/placeholder-600x400.png";
-      }
     	self.selectedTheme = response.data.selectedTheme
+      self.renderThemes()
     })
     .catch(e => {
       console.log(e)
     })
   },
   methods: {
-  	deletePage: function(c){
+    renderThemes: function(){
+      for(var x in this.Themes){
+        if(!this.Themes[x].thumbnail) this.Themes[x].thumbnail = "https://carepharmaceuticals.com.au/wp-content/uploads/sites/19/2018/02/placeholder-600x400.png";
+      }
+    },
+  	selectTheme: function(c){
   		var loading = this.$loading({
           lock: true,
           text: 'Updating',
@@ -69,16 +76,17 @@ export default {
           background: 'rgba(0, 0, 0, 0.7)'
         });
         var self = this
-  		this.axios.post(window.Config.API.endpoint+'page/delete', {
+  		this.axios.post(window.Config.API.endpoint+'theme/save', {
 	      key : c,
 	    })
 	    .then(response => {
-	    	self.Pages = response.data.Pages
-	    	self.renderPages()
+        self.Themes = response.data.themes
+        self.selectedTheme = response.data.selectedTheme	
+        self.renderThemes()
 		    self.$message({
 	          showClose: true,
-	          message: 'Page deleted !',
-	          type: 'danger'
+	          message: 'Theme selected',
+	          type: 'success'
 	        });
 	        setTimeout(() => {
 	          loading.close();
@@ -89,7 +97,37 @@ export default {
 	          loading.close();
 	        }, 500);
 	    })
-  	}
+  	},
+    deleteTheme: function(c){
+      var loading = this.$loading({
+          lock: true,
+          text: 'Updating',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        var self = this
+      this.axios.post(window.Config.API.endpoint+'theme/delete', {
+        key : c,
+      })
+      .then(response => {
+        self.Themes = response.data.themes
+        self.selectedTheme = response.data.selectedTheme  
+        self.renderThemes()
+        self.$message({
+            showClose: true,
+            message: 'Theme deleted',
+            type: 'success'
+          });
+          setTimeout(() => {
+            loading.close();
+          }, 500);
+      })
+      .catch(e => {
+        setTimeout(() => {
+            loading.close();
+          }, 500);
+      })
+    }
   },
   watch: {
   }
@@ -97,70 +135,59 @@ export default {
 </script>
 
 <style scoped>
-.box.details .box-title{
-	text-align: left;
+.theme{
+  padding: 0px;
+  margin-bottom: 10px;
 }
-.box.details .box-title .el-tag{
-	float: right;
-	margin-top: -5px;
+.theme img{
+  display: block;
+  width: 100%;
+  float: unset;
+  max-width: 100%;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  margin-bottom: 10px;
 }
-.box-content a{
-    color: #44ccc0;
-    font-size: 16px;
+.theme .content{
+  padding: 10px;
+  margin-bottom: 0px;
 }
-.box-content span{
-	font-size: 14px;
-    border-radius: 2px;
-    margin: 0px 0px;
-    display: inline-block;
-    padding: 0px;
-    /*border: 1px solid #607D8B;*/
-    /*border: none;*/
-    color: #fff;
-    /*float: right;*/
-    /*margin-right: 10px;*/
+.theme h3{
+  font-size: 16px;
+  font-weight: normal;
 }
-.box-content .columns{
-	margin-bottom: 0px;
+.theme p{
+  font-size: 14px;
+  color: #607D8B;
 }
-.box-content span b{
-	background: #009688;
-	color: white;
-	padding: 0px 5px;
-	font-weight: normal;
-	/*float: right;*/
-	border-radius: 3px;
-	margin-left: 5px;
+.theme a{
+  font-size: 14px;
 }
-.el-switch__label{
-	color: #ddd !important;
+.theme .is-outlined{
+  width: 49%;
 }
-.el-switch__label.is-active{
-	color: #fff !important;
+.theme .is-fullwidth{
+  border-radius: 0px;
+  font-size: 15px;
 }
-.box-content .el-switch, .box-content .deleteBtn{
-	display: inline-block;
+.theme .is-success{
+  background-color: #4CAF50;
 }
-.box-content .deleteBtn{
-    /*float: right;*/
-    color: #FF5722;
-    font-size: 20px;
-    cursor: pointer;
+.theme .is-primary{
+  background-color: #209cee;
 }
-.el-button--success{
-	float: right;
-	margin-right: 15px;
-	margin-top: -2px;
+.theme .is-warning{
+  background-color: #F44336;
+  color: white;
 }
-</style>
-<style>
-.box.details #searchTextInput{
-    margin-left: 5px !important; 
-    height: 25px !important; 
-    border-radius: 3px !important; 
-    background: #303f54 !important; 
-    border: 1px solid #1a233c !important; 
-    color: #eee !important; 
-    padding-right: 0px;
+.theme i{
+  float: left;
+  margin-right: 10px;
+}
+.theme .delete{
+  float: right;
+  margin-bottom: -29px;
+  margin-right: 10px;
+  margin-top: 5px;
 }
 </style>
