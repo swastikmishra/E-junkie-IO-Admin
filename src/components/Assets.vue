@@ -217,4 +217,8 @@ export default {
 .card .title.is-4{
   font-size: 14px;
 }
+.table th{
+  max-width: 350px !important;
+  overflow: hidden !important;
+}
 </style>
