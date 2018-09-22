@@ -20,7 +20,7 @@ Vue.prototype.$bus = EventBus
 //Basic config for the app
 window.Config = {}
 window.Config.API = {
-	"endpoint" : "http://cms/api/",
+	"endpoint" : "/api/",
 }
 
  

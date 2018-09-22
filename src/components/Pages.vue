@@ -27,7 +27,7 @@
 	  				</div>
 		  			<div class="columns" v-for="Page,K in Pages" v-if="Page.show">
 		  				<div class="column is-1">
-		  					<a target="_preview" :href="`${K.replace('.md', '')}`">
+		  					<a target="_preview" :href="`/${K.replace('.md', '')}`">
 		  						<i class="icon ion-md-open"></i>
 	  						</a>
   						</div>
